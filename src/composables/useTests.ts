@@ -1,0 +1,27 @@
+import type { TestResult } from '../types/probe'
+
+export const probeTests: Pick<TestResult, 'id' | 'name'>[] = [
+  { id: 'connection', name: 'Connection Test' },
+  { id: 'identity', name: 'Identity Test' },
+  { id: 'model-consistency', name: 'Model Consistency' },
+  { id: 'protocol', name: 'Protocol Test' },
+  { id: 'tool-calling', name: 'Tool Calling Test' },
+  { id: 'tool-choice', name: 'Tool Choice Fidelity' },
+  { id: 'logprobs', name: 'Logprobs Pass-through' },
+  { id: 'stop-fidelity', name: 'Stop Sequence Fidelity' },
+  { id: 'json-format', name: 'JSON Format Compliance' },
+  { id: 'max-tokens-clamp', name: 'Max Tokens Clamp' },
+  { id: 'sampling-params', name: 'Sampling Parameter Honesty' },
+  { id: 'streaming', name: 'Streaming Test' },
+  { id: 'context', name: 'Context Test' },
+  { id: 'token-usage', name: 'Token Usage Test' },
+  { id: 'response-id-uniqueness', name: 'Response ID Uniqueness' },
+  { id: 'cache-replay', name: 'Cache Replay Detection' },
+  { id: 'prompt-fidelity', name: 'Prompt Fidelity' },
+  { id: 'watermark', name: 'Hidden Watermark Scan' },
+  { id: 'concurrency', name: 'Concurrency Serialization' },
+  { id: 'security', name: 'Security Test' },
+  { id: 'policy-boundary', name: 'Policy Boundary' },
+  { id: 'gateway-transparency', name: 'Gateway Transparency' },
+  { id: 'performance', name: 'Performance Test' },
+]

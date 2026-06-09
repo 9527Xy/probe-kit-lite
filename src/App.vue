@@ -1,0 +1,16 @@
+<template>
+  <Header />
+  <RouterView />
+</template>
+
+<script setup lang="ts">
+import { RouterView } from 'vue-router'
+
+import Header from './components/Header.vue'
+</script>
+
+<style scoped>
+#app {
+  min-height: 100vh;
+}
+</style>
