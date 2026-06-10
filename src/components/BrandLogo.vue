@@ -28,7 +28,7 @@ withDefaults(
 .brand-logo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: var(--color-text);
 }
 
@@ -37,8 +37,8 @@ withDefaults(
 }
 
 .brand-logo--small .brand-logo__mark {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
 }
 
 .brand-logo--large .brand-logo__mark {
@@ -52,7 +52,8 @@ withDefaults(
 }
 
 .brand-logo--small .brand-logo__text {
-  font-size: 15px;
+  font-size: 20px;
+  line-height: 1;
 }
 
 .brand-logo--large {

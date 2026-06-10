@@ -29,22 +29,22 @@ const { t, toggleLocale } = useI18n()
   align-items: center;
   justify-content: space-between;
   width: min(100% - 32px, var(--container-width));
-  min-height: 72px;
+  min-height: 84px;
   margin: 0 auto;
 }
 
 .logo {
   display: inline-flex;
   align-items: center;
-  padding: 4px 0;
+  padding: 6px 0;
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .nav a.router-link-active,
@@ -58,7 +58,7 @@ const { t, toggleLocale } = useI18n()
   border: 0;
   color: inherit;
   background: transparent;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 @media (max-width: 560px) {

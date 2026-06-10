@@ -1,8 +1,7 @@
 <template>
   <main class="page-shell home-page">
     <section class="hero">
-      <BrandLogo size="large" />
-      <p>{{ t('hero.subtitle') }}</p>
+      <p class="hero-summary">{{ t('hero.subtitle') }}</p>
     </section>
 
     <section class="section">
@@ -34,7 +33,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-import BrandLogo from '../components/BrandLogo.vue'
 import ConfigPanel from '../components/ConfigPanel.vue'
 import ReportPanel from '../components/ReportPanel.vue'
 import TestGrid from '../components/TestGrid.vue'
@@ -71,12 +69,12 @@ async function startProbe(config: ProbeConfig) {
 }
 
 .hero {
-  padding: 68px 0 38px;
+  padding: 52px 0 24px;
 }
 
-.hero p {
+.hero-summary {
   max-width: 620px;
-  margin: 20px 0 0;
+  margin: 0;
   color: var(--color-muted);
   font-size: 18px;
   line-height: 1.6;
@@ -120,7 +118,11 @@ async function startProbe(config: ProbeConfig) {
 
 @media (max-width: 560px) {
   .hero {
-    padding-top: 40px;
+    padding-top: 32px;
+  }
+
+  .hero-summary {
+    font-size: 16px;
   }
 }
 </style>
