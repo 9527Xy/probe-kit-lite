@@ -7,6 +7,7 @@
       <RouterLink to="/report">{{ t('nav.report') }}</RouterLink>
       <RouterLink to="/history">{{ t('nav.history') }}</RouterLink>
       <a href="https://gitee.com/1634874721/probe-kit-lite" target="_blank" rel="noreferrer">{{ t('nav.gitee') }}</a>
+      <a href="https://github.com/9527Xy/probe-kit-lite" target="_blank" rel="noreferrer">{{ t('nav.github') }}</a>
       <button class="language-button" type="button" @click="toggleLocale">
         {{ t('nav.language') }}
       </button>
