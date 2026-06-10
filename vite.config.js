@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-const fallbackSiteUrl = 'https://probe-kit-lite.com'
+const fallbackSiteUrl = 'https://probekitlite.top'
 
 function normalizeSiteUrl(siteUrl) {
   return (siteUrl || fallbackSiteUrl).replace(/\/$/, '')

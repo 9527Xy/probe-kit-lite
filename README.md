@@ -114,7 +114,7 @@ npm run generate:seo
 4. 按实际站点信息替换 `public/baidu_verify_code.html`、`public/google-site-verification.html` 与 `index.html` 中的验证内容。
 5. 上线后向搜索引擎平台提交 `sitemap.xml`。
 
-未配置时会使用默认域名 `https://probe-kit-lite.com` 生成相关文件。
+未配置时会使用默认域名 `https://probekitlite.top` 生成相关文件。
 
 ## 使用说明
 

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const publicDir = resolve(rootDir, 'public')
-const fallbackSiteUrl = 'https://probe-kit-lite.com'
+const fallbackSiteUrl = 'https://probekitlite.top'
 const routes = [
   { path: '/', priority: '1.0' },
   { path: '/report', priority: '0.7' },

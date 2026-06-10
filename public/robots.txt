@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://probe-kit-lite.com/sitemap.xml
+Sitemap: https://probekitlite.top/sitemap.xml
