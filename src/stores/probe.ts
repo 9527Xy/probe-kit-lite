@@ -261,15 +261,7 @@ function loadHistory(): ProbeReport[] {
 }
 
 function saveHistory(history: ProbeReport[]) {
-  const compactHistory = history.slice(0, MAX_HISTORY).map((report) => ({
-    ...report,
-    usage: report.usage
-      ? {
-          ...report.usage,
-          records: report.usage.records.slice(0, 5),
-        }
-      : undefined,
-  }))
+  const compactHistory = history.slice(0, MAX_HISTORY)
 
   localStorage.setItem(HISTORY_KEY, JSON.stringify(compactHistory))
 }
