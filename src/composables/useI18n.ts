@@ -25,6 +25,8 @@ type MessageKey =
   | 'config.model'
   | 'config.modelPlaceholder'
   | 'config.noModels'
+  | 'config.aiScoring'
+  | 'config.aiScoringHint'
   | 'config.start'
   | 'config.running'
   | 'status.waiting'
@@ -50,8 +52,15 @@ type MessageKey =
   | 'report.request'
   | 'report.response'
   | 'report.noUsage'
+  | 'report.aiScoring'
+  | 'report.aiScoringFailed'
+  | 'report.aiScoringReady'
+  | 'report.originalReport'
+  | 'report.aiReport'
   | 'history.title'
   | 'history.empty'
+  | 'history.originalScore'
+  | 'history.aiScore'
   | 'history.tests'
   | 'history.tokens'
 
@@ -88,6 +97,9 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     'config.model': 'Model',
     'config.modelPlaceholder': 'Search or select a model...',
     'config.noModels': 'No matching models',
+    'config.aiScoring': 'Use AI scoring',
+    'config.aiScoringHint':
+      'After the probe completes, send all local request summaries and results to the configured model for scoring. This may consume extra tokens.',
     'config.start': 'Start Probe',
     'config.running': 'Running Probe',
     'status.waiting': 'Waiting',
@@ -113,9 +125,16 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     'report.request': 'Request',
     'report.response': 'Response',
     'report.noUsage': 'No usage summary was reported by this API.',
+    'report.aiScoring': 'AI Scoring',
+    'report.aiScoringFailed': 'AI scoring failed; heuristic scores were kept.',
+    'report.aiScoringReady': 'AI report generated separately.',
+    'report.originalReport': 'Original Report',
+    'report.aiReport': 'AI Report',
     'history.title': 'History',
     'history.empty':
       'History is reserved for the first phase. Completed reports are stored locally after probes run.',
+    'history.originalScore': 'Original score',
+    'history.aiScore': 'AI score',
     'history.tests': 'tests',
     'history.tokens': 'tokens',
   },
@@ -144,6 +163,8 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     'config.model': '模型',
     'config.modelPlaceholder': '搜索或选择模型...',
     'config.noModels': '没有匹配的模型',
+    'config.aiScoring': '使用 AI 进行评分',
+    'config.aiScoringHint': '检测结束后会把本地记录的请求摘要和结果发送给当前模型复评，可能增加 token 消耗。',
     'config.start': '开始检测',
     'config.running': '检测中',
     'status.waiting': '等待',
@@ -169,8 +190,15 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     'report.request': '入参',
     'report.response': '返参',
     'report.noUsage': '该 API 没有返回 usage 用量汇总。',
+    'report.aiScoring': 'AI 评分',
+    'report.aiScoringFailed': 'AI 评分失败，已保留原启发式评分。',
+    'report.aiScoringReady': 'AI 报告已单独生成。',
+    'report.originalReport': '原始报告',
+    'report.aiReport': 'AI 报告',
     'history.title': '历史',
     'history.empty': '历史记录为第一阶段占位；检测完成后报告会保存在本地。',
+    'history.originalScore': '原始评分',
+    'history.aiScore': 'AI 评分',
     'history.tests': '项检测',
     'history.tokens': 'tokens',
   },
@@ -202,6 +230,7 @@ const testNames: Record<Locale, Record<string, string>> = {
     'Policy Boundary': '合规边界',
     'Gateway Transparency': '网关透明度',
     'Performance Test': '性能测试',
+    'AI Scoring': 'AI 评分',
   },
 }
 
@@ -218,6 +247,7 @@ const categories: Record<Locale, Record<string, string>> = {
     Compliance: '合规',
     Performance: '性能',
     Skipped: '已跳过',
+    Review: '复评',
     General: '通用',
   },
 }
@@ -246,6 +276,9 @@ const zhDetails: Record<string, string> = {
   'Waiting to check whether unsafe requests are refused or redirected.': '等待检查不安全请求是否被拒绝或转向。',
   'Waiting to inspect response metadata and gateway transparency.': '等待检查响应元数据与网关透明度。',
   'Waiting to measure repeated request latency.': '等待测量连续请求延迟。',
+  'Waiting to review probe results with AI.': '等待使用 AI 复评检测结果。',
+  'Reviewing all probe results with AI...': '正在使用 AI 复评所有检测结果...',
+  'AI report generated separately.': 'AI 报告已单独生成。',
   'Running...': '运行中...',
   'Checking endpoint reachability before running tests...': '正在检测 endpoint 连通性，随后再运行其他测试...',
   'Skipped because the configured API URL did not pass the connection preflight.':

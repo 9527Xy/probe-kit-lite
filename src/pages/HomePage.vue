@@ -44,7 +44,7 @@ import { useProbeStore } from '../stores/probe'
 import type { ProbeConfig } from '../types/probe'
 
 const store = useProbeStore()
-const { t } = useI18n()
+const { locale, t } = useI18n()
 const router = useRouter()
 
 async function startProbe(config: ProbeConfig) {
@@ -53,7 +53,7 @@ async function startProbe(config: ProbeConfig) {
   store.setRunning(true)
 
   try {
-    const probe = useProbe(store.config, (result) => store.updateTest(result))
+    const probe = useProbe(store.config, (result) => store.updateTest(result), locale.value)
     const report = await probe.runProbe()
     store.setReport(report)
     await router.push('/report')

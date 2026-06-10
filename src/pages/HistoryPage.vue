@@ -3,16 +3,31 @@
     <section class="section">
       <h1>{{ t('history.title') }}</h1>
       <div v-if="store.history.length" class="history-list">
-        <article v-for="report in store.history" :key="report.startTime" class="history-item">
-          <div>
-            <strong>{{ report.totalScore }}</strong>
+        <button
+          v-for="report in store.history"
+          :key="report.startTime"
+          class="history-item"
+          type="button"
+          @click="openReport(report)"
+        >
+          <div class="history-item__header">
+            <div class="score-pair">
+              <div>
+                <span>{{ t('history.originalScore') }}</span>
+                <strong>{{ report.totalScore }}</strong>
+              </div>
+              <div v-if="report.aiReport">
+                <span>{{ t('history.aiScore') }}</span>
+                <strong>{{ report.aiReport.totalScore }}</strong>
+              </div>
+            </div>
             <span>{{ formatTime(report.startTime) }}</span>
           </div>
           <p>
             {{ report.tests.length }} {{ t('history.tests') }} · {{ report.endTime - report.startTime }} ms ·
             {{ report.usage?.totalTokens ?? 0 }} {{ t('history.tokens') }}
           </p>
-        </article>
+        </button>
       </div>
       <div v-else class="empty-state">
         {{ t('history.empty') }}
@@ -23,12 +38,15 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { useI18n } from '../composables/useI18n'
 import { useProbeStore } from '../stores/probe'
+import type { ProbeReport } from '../types/probe'
 
 const store = useProbeStore()
 const { t, locale } = useI18n()
+const router = useRouter()
 
 onMounted(() => {
   store.loadHistory()
@@ -39,6 +57,11 @@ function formatTime(timestamp: number) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(timestamp)
+}
+
+async function openReport(report: ProbeReport) {
+  store.selectReport(report)
+  await router.push('/report')
 }
 </script>
 
@@ -66,11 +89,43 @@ h1 {
   background: var(--color-surface);
 }
 
+.history-item {
+  width: 100%;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.history-item:hover,
+.history-item:focus-visible {
+  border-color: var(--color-text);
+}
+
+.history-item:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
 .history-item div {
   display: flex;
-  align-items: baseline;
+}
+
+.history-item__header {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.score-pair {
+  display: flex;
+  gap: 18px;
+}
+
+.score-pair div {
+  display: grid;
+  gap: 4px;
 }
 
 .history-item strong {
@@ -84,7 +139,19 @@ h1 {
   font-size: 14px;
 }
 
+.score-pair span {
+  font-size: 12px;
+  font-weight: 650;
+}
+
 .history-item p {
   margin: 8px 0 0;
+}
+
+@media (max-width: 560px) {
+  .history-item__header,
+  .score-pair {
+    flex-direction: column;
+  }
 }
 </style>

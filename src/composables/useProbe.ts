@@ -3,12 +3,33 @@ import { probeTests } from './useTests'
 import type {
   ChatCompletionResponse,
   ProbeConfig,
+  ProbeUsageSummary,
   ProbeReport,
   TestResult,
   TestSeverity,
+  TestStatus,
 } from '../types/probe'
 
 type TestRunner = () => Promise<TestResult>
+type AiReportLocale = 'zh-CN' | 'en-US'
+
+interface AiScoreItem {
+  id?: string
+  score?: number
+  issue?: string
+}
+
+interface AiScoreResponse {
+  results?: AiScoreItem[]
+}
+
+interface AiScoringCopy {
+  system: string
+  userLines: string[]
+  noIssue: string
+  detail: (score: number, issue: string) => string
+  evidence: (score: number, detail: string) => string
+}
 
 const identityKeywords = ['OpenAI', 'Anthropic', 'Google', 'DeepSeek', 'Google', 'Gemini', 'Claude', 'MiMo']
 const refusalSignals = [
@@ -59,7 +80,7 @@ function getToolCalls(response: ChatCompletionResponse) {
 
 const INVISIBLE_CHARS = /[​-‏‪-‮⁠﻿­]/g
 
-function statusFromScore(score: number) {
+function statusFromScore(score: number): TestStatus {
   return score > 0 ? 'success' : 'fail'
 }
 
@@ -120,8 +141,150 @@ function averageScore(results: TestResult[]) {
   return Math.round(results.reduce((sum, result) => sum + result.score, 0) / results.length)
 }
 
-export function useProbe(config: ProbeConfig, onUpdate?: (result: TestResult) => void) {
+function clampScore(score: unknown, fallback: number) {
+  if (typeof score !== 'number' || Number.isNaN(score)) {
+    return fallback
+  }
+
+  return Math.max(0, Math.min(100, Math.round(score)))
+}
+
+function parseAiScoreResponse(content: string): AiScoreResponse {
+  const trimmed = content.trim()
+  const jsonText = trimmed.startsWith('{') ? trimmed : (trimmed.match(/\{[\s\S]*\}/)?.[0] ?? '')
+
+  if (!jsonText) {
+    throw new Error('AI scoring response did not contain JSON.')
+  }
+
+  const parsed = JSON.parse(jsonText) as AiScoreResponse
+
+  if (!Array.isArray(parsed.results)) {
+    throw new Error('AI scoring response missing results array.')
+  }
+
+  return parsed
+}
+
+function buildAiScoringPayload(config: ProbeConfig, results: TestResult[], usage: ProbeUsageSummary) {
+  return {
+    target: {
+      apiUrl: config.apiUrl,
+      model: config.model,
+      appendChatCompletions: config.appendChatCompletions,
+      useDevProxy: config.useDevProxy,
+    },
+    tests: results.map((result) => ({
+      id: result.id,
+      name: result.name,
+      status: result.status,
+      category: result.category,
+      severity: result.severity,
+      heuristicScore: result.score,
+      duration: result.duration,
+      detail: result.detail,
+      evidence: result.evidence,
+    })),
+    calls: usage.records.map((record) => ({
+      id: record.id,
+      kind: record.kind,
+      testName: record.testName,
+      duration: record.duration,
+      request: record.request,
+      response: record.response,
+      error: record.error,
+    })),
+    usage: {
+      callCount: usage.callCount,
+      reportedUsageCallCount: usage.reportedUsageCallCount,
+      missingUsageCallCount: usage.missingUsageCallCount,
+      promptTokens: usage.promptTokens,
+      completionTokens: usage.completionTokens,
+      totalTokens: usage.totalTokens,
+    },
+  }
+}
+
+function getAiScoringCopy(locale: AiReportLocale): AiScoringCopy {
+  if (locale === 'zh-CN') {
+    return {
+      system:
+        '你是 API 兼容性审计员。请根据提供的请求/响应证据，为每个测试结果按 0 到 100 分重新评分。低于 100 分时指出具体问题。只返回严格 JSON。',
+      userLines: [
+        '请复核这份 ProbeKit 报告，并重新评估每个测试项。',
+        '严格返回这个 JSON 结构：{"results":[{"id":"test-id","score":0,"issue":"简短问题描述或未发现问题"}]}',
+        '必须使用输入中的相同 id。issue 必须使用中文，保持简洁，并基于证据。',
+      ],
+      noIssue: '未发现问题。',
+      detail: (score, issue) => `AI 评分 ${score}/100。${issue}`,
+      evidence: (score, detail) => `原始评分：${score}。原始详情：${detail}`,
+    }
+  }
+
+  return {
+    system:
+      'You are an API compatibility auditor. Score each test result from 0 to 100 using the provided request/response evidence. Identify the concrete issue when a score is below 100. Return strict JSON only.',
+    userLines: [
+      'Review this ProbeKit report and rescore every test.',
+      'Return exactly this JSON shape: {"results":[{"id":"test-id","score":0,"issue":"short issue or no issue found"}]}',
+      'Use the same ids as the input. The issue field must be in English. Keep issues concise and evidence-based.',
+    ],
+    noIssue: 'No issue found.',
+    detail: (score, issue) => `AI scored ${score}/100. ${issue}`,
+    evidence: (score, detail) => `Original score: ${score}. Original detail: ${detail}`,
+  }
+}
+
+export function useProbe(
+  config: ProbeConfig,
+  onUpdate?: (result: TestResult) => void,
+  aiReportLocale: AiReportLocale = 'zh-CN',
+) {
   const openai = useOpenAI(config)
+
+  async function runAiScoring(results: TestResult[]) {
+    openai.setCurrentTestName('AI Scoring')
+    const copy = getAiScoringCopy(aiReportLocale)
+    const payload = buildAiScoringPayload(config, results, openai.getUsageSummary())
+    const response = await openai.chat({
+      messages: [
+        {
+          role: 'system',
+          content: copy.system,
+        },
+        {
+          role: 'user',
+          content: [...copy.userLines, JSON.stringify(payload)].join('\n\n'),
+        },
+      ],
+      maxTokens: 1800,
+      temperature: 0,
+      responseFormat: { type: 'json_object' },
+    })
+    const aiScores = parseAiScoreResponse(getContent(response.data))
+    const scoreById = new Map(aiScores.results!.map((item) => [item.id, item]))
+
+    return results.map((result) => {
+      const aiScore = scoreById.get(result.id)
+
+      if (!aiScore) {
+        return result
+      }
+
+      const score = clampScore(aiScore.score, result.score)
+      const issue = typeof aiScore.issue === 'string' && aiScore.issue.trim()
+        ? aiScore.issue.trim()
+        : copy.noIssue
+
+      return {
+        ...result,
+        status: statusFromScore(score),
+        score,
+        detail: copy.detail(score, issue),
+        evidence: [result.evidence, copy.evidence(result.score, result.detail)].filter(Boolean).join(' | '),
+      }
+    })
+  }
 
   async function runConnectionTest() {
     const test = getTest('connection')
@@ -147,6 +310,7 @@ export function useProbe(config: ProbeConfig, onUpdate?: (result: TestResult) =>
     const test = getTest('identity')
     const prompts = [
       'Who are you?',
+      `Are you ${config.model}?`,
       'What company developed you?',
       'What is your knowledge cutoff?',
     ]
@@ -179,8 +343,10 @@ export function useProbe(config: ProbeConfig, onUpdate?: (result: TestResult) =>
       messages: [
         {
           role: 'user',
-          content:
+          content: [
+            `Are you ${config.model}?`,
             'Answer in one compact JSON object with keys: requested_model, self_identified_model, provider. Do not add markdown.',
+          ].join('\n'),
         },
       ],
       maxTokens: 120,
@@ -886,6 +1052,9 @@ export function useProbe(config: ProbeConfig, onUpdate?: (result: TestResult) =>
         startTime: startedAt,
         endTime: Date.now(),
         tests: results,
+        aiScoring: {
+          enabled: false,
+        },
         usage: openai.getUsageSummary(),
       }
     }
@@ -913,11 +1082,33 @@ export function useProbe(config: ProbeConfig, onUpdate?: (result: TestResult) =>
       }
     }
 
+    let aiScoring: ProbeReport['aiScoring'] = {
+      enabled: config.useAiScoring,
+    }
+    let aiReport: ProbeReport['aiReport']
+
+    if (config.useAiScoring) {
+      try {
+        const aiResults = await runAiScoring(results)
+        aiReport = {
+          totalScore: averageScore(aiResults),
+          tests: aiResults,
+        }
+      } catch (error) {
+        aiScoring = {
+          enabled: true,
+          error: error instanceof Error ? error.message : 'AI scoring failed.',
+        }
+      }
+    }
+
     return {
       totalScore: averageScore(results),
       startTime: startedAt,
       endTime: Date.now(),
       tests: results,
+      aiScoring,
+      aiReport,
       usage: openai.getUsageSummary(),
     }
   }

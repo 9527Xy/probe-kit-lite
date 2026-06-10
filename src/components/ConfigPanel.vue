@@ -22,6 +22,12 @@
       </p>
     </div>
 
+    <label class="checkbox-field ai-scoring-field">
+      <input v-model="form.useAiScoring" type="checkbox" />
+      <span>{{ t('config.aiScoring') }}</span>
+    </label>
+    <p class="field-hint ai-scoring-hint">{{ t('config.aiScoringHint') }}</p>
+
     <div class="field">
       <label for="api-key">{{ t('config.apiKey') }}</label>
       <input
@@ -108,6 +114,7 @@ const form = reactive<ProbeConfig>({
   model: props.config.model,
   appendChatCompletions: props.config.appendChatCompletions,
   useDevProxy: props.config.useDevProxy,
+  useAiScoring: props.config.useAiScoring,
 })
 
 const modelQuery = ref('')
@@ -185,6 +192,7 @@ watch(
     form.model = config.model
     form.appendChatCompletions = config.appendChatCompletions
     form.useDevProxy = config.useDevProxy
+    form.useAiScoring = config.useAiScoring
     modelQuery.value = selectedModel.value?.label ?? config.model
   },
   { deep: true },
@@ -246,6 +254,11 @@ function selectModel(model: (typeof modelOptions)[number]) {
 }
 
 .field:first-child {
+  grid-column: 1 / -1;
+}
+
+.ai-scoring-field,
+.ai-scoring-hint {
   grid-column: 1 / -1;
 }
 

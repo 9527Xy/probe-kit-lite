@@ -282,6 +282,7 @@ export const useProbeStore = defineStore('probe', {
       model: '',
       appendChatCompletions: true,
       useDevProxy: false,
+      useAiScoring: true,
     },
     tests: createTests(),
     report: null,
@@ -300,6 +301,7 @@ export const useProbeStore = defineStore('probe', {
         model: config.model.trim(),
         appendChatCompletions: config.appendChatCompletions,
         useDevProxy: config.useDevProxy,
+        useAiScoring: config.useAiScoring,
       }
     },
     resetTests() {
@@ -330,6 +332,9 @@ export const useProbeStore = defineStore('probe', {
       } catch {
         saveHistory([report])
       }
+    },
+    selectReport(report: ProbeReport) {
+      this.report = report
     },
     loadHistory() {
       this.history = loadHistory()

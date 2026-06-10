@@ -33,6 +33,7 @@ export interface ProbeConfig {
   model: string
   appendChatCompletions: boolean
   useDevProxy: boolean
+  useAiScoring: boolean
 }
 
 export interface TestResult {
@@ -80,6 +81,14 @@ export interface ProbeReport {
   startTime: number
   endTime: number
   tests: TestResult[]
+  aiScoring?: {
+    enabled: boolean
+    error?: string
+  }
+  aiReport?: {
+    totalScore: number
+    tests: TestResult[]
+  }
   usage?: ProbeUsageSummary
 }
 
