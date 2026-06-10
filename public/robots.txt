@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://probekitlite.top/sitemap.xml
+Sitemap: https://www.probekitlite.top/sitemap.xml
