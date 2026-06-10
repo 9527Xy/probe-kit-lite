@@ -7,6 +7,7 @@ type MessageKey =
   | 'nav.report'
   | 'nav.history'
   | 'nav.gitee'
+  | 'nav.github'
   | 'nav.language'
   | 'hero.subtitle'
   | 'home.stepConfig'
@@ -75,6 +76,7 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     'nav.report': 'Report',
     'nav.history': 'History',
     'nav.gitee': 'Gitee',
+    'nav.github': 'GitHub',
     'nav.language': '中文',
     'hero.subtitle':
       'Test compatibility, performance, and authenticity across GPT, Claude, DeepSeek, Gemini, MiMo, and OpenAI-compatible APIs.',
@@ -142,6 +144,7 @@ const messages: Record<Locale, Record<MessageKey, string>> = {
     'nav.report': '报告',
     'nav.history': '历史',
     'nav.gitee': 'Gitee',
+    'nav.github': 'GitHub',
     'nav.language': 'English',
     'hero.subtitle': '检测 GPT、Claude、DeepSeek、Gemini、MiMo 以及 OpenAI 兼容 API 的兼容性、性能与真实性。',
     'home.stepConfig': '步骤 01 · 配置接口',
