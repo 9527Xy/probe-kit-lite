@@ -1,7 +1,7 @@
 import type { Router } from 'vue-router'
 
 const siteName = 'ProbeKit Lite'
-const fallbackSiteUrl = 'https://probekitlite.top'
+const fallbackSiteUrl = 'https://www.probekitlite.top'
 const configuredSiteUrl = import.meta.env.VITE_SITE_URL?.replace(/\/$/, '')
 
 function getBaseUrl() {
